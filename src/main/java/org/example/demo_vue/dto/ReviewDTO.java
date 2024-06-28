@@ -1,8 +1,10 @@
 package org.example.demo_vue.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class ReviewDTO {
     String id;
     String title;
