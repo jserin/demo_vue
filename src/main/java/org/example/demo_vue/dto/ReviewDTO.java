@@ -11,4 +11,6 @@ public class ReviewDTO {
     String address;
     Integer grade;
     String review;
+    Double lon;
+    Double lat;
 }
