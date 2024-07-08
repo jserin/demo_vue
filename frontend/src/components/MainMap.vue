@@ -25,7 +25,7 @@ import {defaults} from 'ol/control';
 import Geocoder from 'ol-geocoder'
 
 //pinia
-import { mapActions, mapState  } from 'pinia';
+import { mapActions, mapState } from 'pinia';
 import { useReviewStore } from '@/store';
 
 import axios from "axios";
@@ -49,13 +49,14 @@ export default {
         limit: 8,
         autoComplete: true,
         keepOpen: true
-      })
+      }),
+      iconsSource: undefined
     }
   },
   computed: {
     ...mapState(useReviewStore, ['reviews'])
   },
-  mounted() {
+  async mounted() {
     const vectorLayer = new OlVectorLayer({
       source: this.vectorSource
     })
@@ -78,6 +79,14 @@ export default {
         projection: EPSG_3857
       })
     })
+    await this.setReviews();
+    this.olMap.on('click', async (e) => {
+      await this.addUiAddress(e);
+      this.drawMapIcon(e);
+
+      const lonLatArr = toLonLat(e.coordinate);
+      useReviewStore().setLonLat(lonLatArr[0], lonLatArr[1]);
+    });
     this.olMap.addControl(this.geocoder);
 
     this.geocoder.on('addresschosen', (evt) => {
@@ -126,6 +135,19 @@ export default {
     ...mapActions(useReviewStore, ['setReviews']),
     async fetchReviews() {
       await this.setReviews();
+    },
+    drawFeatures() {
+      if (this.iconsSource) this.iconsSource.clear();
+      this.iconsSource = new OlVectorSource(EPSG_3857);
+      const iconsLayer = new OlVectorLayer({
+        source: this.iconsSource
+      });
+      const style = new OlStyle({
+        image: new OlIcon({
+          scale: 0.8,
+          src: require('@/assets/images/spot.png')
+        })
+      });
     }
   },
   setup() {

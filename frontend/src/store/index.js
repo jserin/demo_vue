@@ -21,7 +21,7 @@ export const useReviewStore  = defineStore('review', {
                 console.error('There was an error fetching the reviews:', error);
             }
         },
-        setLonLat({ lon, lat }) {
+        setLonLat(lon, lat) {
             this.curLon = lon;
             this.curLat = lat;
         },

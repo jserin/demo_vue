@@ -77,7 +77,7 @@ const showSideBar = () => isVisibleSideBar.value = !isVisibleSideBar.value;
 const globalMessage = inject('globalMessage');
 const selectedAdd = computed(() => globalMessage.value);
 
-const saveReview = () => {
+const saveReview = async () => {
   loading.value = true;
 
   const reviewData = {
@@ -89,7 +89,7 @@ const saveReview = () => {
     lat: reviewStore.curLat
   };
 
-  apiSaveReview(
+  await apiSaveReview(
       reviewData,
       (data) => {
         console.log("Review saved successfully:", data);
