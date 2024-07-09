@@ -1,13 +1,6 @@
 <template>
   <div class="main-map" ref="map">
   </div>
-  <div>
-    <p>리뷰 목록:</p>
-    <ul>
-      <li v-for="review in reviews" :key="review.id">{{ review.title }}</li>
-    </ul>
-    <button @click="fetchReviews">리뷰 불러오기</button>
-  </div>
 </template>
 
 <script>
@@ -31,7 +24,7 @@ import { useReviewStore } from '@/store';
 import axios from "axios";
 import { inject } from 'vue';
 
-// 위치 표시
+// 레이어 추가
 import OlVectorSource from 'ol/source/Vector'
 import OlVectorLayer from 'ol/layer/Vector'
 const EPSG_3857 = 'EPSG:3857';
@@ -80,6 +73,8 @@ export default {
       })
     })
     await this.setReviews();
+    this.drawFeatures();
+
     this.olMap.on('click', async (e) => {
       await this.addUiAddress(e);
       this.drawMapIcon(e);
@@ -133,9 +128,6 @@ export default {
       this.vectorSource.addFeature(feature);
     },
     ...mapActions(useReviewStore, ['setReviews']),
-    async fetchReviews() {
-      await this.setReviews();
-    },
     drawFeatures() {
       if (this.iconsSource) this.iconsSource.clear();
       this.iconsSource = new OlVectorSource(EPSG_3857);
@@ -144,10 +136,27 @@ export default {
       });
       const style = new OlStyle({
         image: new OlIcon({
-          scale: 0.8,
+          scale: 0.04,
           src: require('@/assets/images/spot.png')
         })
       });
+      const features = this.reviews.map(review => {
+        const point = fromLonLat([review.lon, review.lat])
+        const feature = new OlFeature({
+          geometry: new OlPoint(point)
+        })
+        feature.set('title', review.title);
+        feature.set('grade', review.grade);
+        feature.set('address', review.address);
+        feature.set('review', review.review);
+        feature.set('reviewId', review.id);
+        feature.setStyle(style);
+
+        return feature;
+      })
+      this.iconsSource.addFeatures(features);
+
+      this.olMap.addLayer(iconsLayer);
     }
   },
   setup() {
